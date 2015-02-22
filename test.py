@@ -17,8 +17,8 @@
 import sys
 import random
 import unittest
-from elgamal_cipher import ElGamal
-import generate_prime as Prime
+from cipher.elgamal_cipher import ElGamal
+import cipher.generate_prime as Prime
 
 class TestSequenceFunctions(unittest.TestCase):
     def test_miller_rabin(self):
@@ -29,7 +29,7 @@ class TestSequenceFunctions(unittest.TestCase):
         print "Test: Miller-Rabin"
 
         # Load the first 10.000 primes from http://primes.utm.edu/lists/small/10000.txt
-        with open("10000primes.dat") as f:
+        with open("cipher/10000primes.dat") as f:
             data = f.readlines()
             known_primes = [int(x) for x in data]
 
@@ -43,7 +43,7 @@ class TestSequenceFunctions(unittest.TestCase):
         # Ask for n primes and check if they are really primes
         n = 10000
         prime_order = 16
-        with open("10000primes.dat") as f:
+        with open("cipher/10000primes.dat") as f:
             data = f.readlines()
             known_primes = [int(x) for x in data]
 
@@ -58,8 +58,8 @@ class TestSequenceFunctions(unittest.TestCase):
                 right+=1
             else:
                 wrong+=1
-        self.assertTrue(float(wrong)/right <= 0.01) 
-       
+        self.assertTrue(float(wrong)/right <= 0.01)
+
 
     def test_elgamal(self):
         #
@@ -78,7 +78,7 @@ class TestSequenceFunctions(unittest.TestCase):
             c,ke = cipher.encrypt(n)
             self.assertNotEqual(c,n)
             self.assertEqual(cipher.decrypt([c,ke]),n)
-    
+
     def test_elgamal_exponential(self):
         #
         # Tests if this cipher can encrypt and decrypt all values up to 10**3
@@ -98,7 +98,7 @@ class TestSequenceFunctions(unittest.TestCase):
             c,ke = cipher.encrypt(n)
             self.assertNotEqual(c,n)
             self.assertEqual(lookup_table[cipher.decrypt([c,ke])],n)
-            
+
     def test_deterministic_elgamal_A(self):
         m = 1564
 
@@ -108,7 +108,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
         c = cipher.encrypt(m)
         self.assertEqual(c,cipher.encrypt(m))
-    
+
     def test_deterministic_elgamal_B(self):
         m = 1565
 
