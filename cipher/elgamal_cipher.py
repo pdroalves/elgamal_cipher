@@ -34,7 +34,7 @@ class ElGamal(Cipher):
 	def generate_keys(self,key_size=1024):
 		#
 		# Public key: (p,alpha,beta)
-		# Private key: (d) 
+		# Private key: (d)
 		#
 		p = None
 		while p is None:
@@ -58,7 +58,7 @@ class ElGamal(Cipher):
 			   }
 
 		return self.keys
-	
+
 	def set_deterministic(self,km=None):
 		if km is None:
 			pub = Cipher.get_public_key(self)
@@ -66,14 +66,14 @@ class ElGamal(Cipher):
 			km = pow(pub["beta"],i,pub["p"])
 		Cipher.add_to_public_key(self,"km",km)
 		return km
-		
+
 	def encrypt(self,m):
 		#
 		# Encrypts a single integer
 		#
 
 		assert self.__is_int(m)
-		
+
 		pub = Cipher.get_public_key(self)
 
 		assert pub.has_key("p")
@@ -116,7 +116,7 @@ class ElGamal(Cipher):
 
 		p = pub["p"]
 		d = priv["d"]
-		if type(x) == list and len(x) == 2:
+		if (type(x) == list or type(x) == tuple) and len(x) == 2:
 			c = x[0]
 			ke = x[1]
 		else:
@@ -130,7 +130,7 @@ class ElGamal(Cipher):
 	def generate_lookup_table(self,a=0,b=10**3):
 		#
 		# Receives an base g, prime p, a public key pub and a interval [a,b],
-		# computes and encrypts all values g**i mod p for a <= i <= b and 
+		# computes and encrypts all values g**i mod p for a <= i <= b and
 		# returns a lookup table
 		#
 		pub = Cipher.get_public_key(self)

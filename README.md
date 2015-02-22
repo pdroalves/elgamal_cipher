@@ -3,7 +3,7 @@ ElGamal Cryptosystem
 
 #About
 
-This is a Python implementation of ElGamal cryptosystem. Our purpose is provide a correct, efficient and very easy to use; code. 
+This is a Python implementation of ElGamal cryptosystem. Our purpose is provide a correct, efficient and very easy to use; code.
 
 #Features
 - Key generation process is completely encapsulated, including primes generation.

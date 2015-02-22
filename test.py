@@ -40,7 +40,12 @@ class TestSequenceFunctions(unittest.TestCase):
                 self.assertFalse(n in known_primes)
 
     def test_generate_primes(self):
+        #
         # Ask for n primes and check if they are really primes
+        #
+
+        print "Test: Generate Primes"
+
         n = 10000
         prime_order = 16
         with open("cipher/10000primes.dat") as f:
@@ -60,7 +65,18 @@ class TestSequenceFunctions(unittest.TestCase):
                 wrong+=1
         self.assertTrue(float(wrong)/right <= 0.01)
 
+    def test_simple_elgamal(self):
+        #
+        # Very simple tests that asserts that we can decrypt whatever encrypt()
+        # returns
+        #
 
+        print "Test: Simple ElGamal Cipher"
+
+        cipher = ElGamal()
+        cipher.generate_keys()
+        value = random.randint(0,10000)
+        self.assertEqual(cipher.decrypt(cipher.encrypt(value)),value)
     def test_elgamal(self):
         #
         # Tests if this cipher can encrypt and decrypt all values up to 10**3
@@ -100,6 +116,12 @@ class TestSequenceFunctions(unittest.TestCase):
             self.assertEqual(lookup_table[cipher.decrypt([c,ke])],n)
 
     def test_deterministic_elgamal_A(self):
+        #
+        # Check if we can set ElGamal to deterministic mode
+        #
+
+        print "Test: Deterministic ElGamal A"
+
         m = 1564
 
         cipher = ElGamal()
@@ -110,6 +132,13 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(c,cipher.encrypt(m))
 
     def test_deterministic_elgamal_B(self):
+        #
+        # Check if we can set ElGamal to deterministic mode choosing
+        # arbitrarily r
+        #
+
+        print "Test: Deterministic ElGamal B"
+
         m = 1565
 
         cipher = ElGamal()
