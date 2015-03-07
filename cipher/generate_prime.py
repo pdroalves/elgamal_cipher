@@ -17,9 +17,6 @@ import math
 import sys
 
 def miller_rabin(p,s=11):
-    # using security parameter s=11, we have a error probability of less than
-    # 2**-80
-
     #computes p-1 decomposition in 2**u*r
     r = p-1
     u = 0
@@ -45,7 +42,7 @@ def miller_rabin(p,s=11):
     return True
 
 
-def is_prime(n):
+def is_prime(n,s):
      #lowPrimes is all primes (sans 2, which is covered by the bitwise and operator)
      #under 1000. taking n modulo each lowPrime allows us to remove a huge chunk
      #of composite numbers from our potential pool without resorting to Rabin-Miller
@@ -66,18 +63,22 @@ def is_prime(n):
                     return True
                  if (n % p == 0):
                      return False
-             return miller_rabin(n)
+             return miller_rabin(n,s)
      return False
 
-def generate_large_prime(k):
+def generate_large_prime(k,s=11):
     #print "Generating prime of %d bits" % k
     #k is the desired bit length
-    r=100*(math.log(k,2)+1) #number of attempts max
+
+    # using security parameter s=11, we have a error probability of less than
+    # 2**-80
+
+    r=100*(math.log(k,2)+1) #number of max attempts
     while r>0:
         #randrange is mersenne twister and is completely deterministic
         #unusable for serious crypto purposes
         n = random.randrange(2**(k-1),2**(k))
         r-=1
-        if is_prime(n) == True:
+        if is_prime(n,s) == True:
             return n
     raise Exception("Failure after %d tries." % r)
