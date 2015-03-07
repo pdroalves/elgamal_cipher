@@ -67,11 +67,12 @@ class ElGamal(Cipher):
 		Cipher.add_to_public_key(self,"km",km)
 		return km
 
-	def encrypt(self,m):
+	def encrypt(self,plaintext):
 		#
 		# Encrypts a single integer
 		#
 
+		m = self.__encode(plaintext)
 		assert self.__is_int(m)
 
 		pub = Cipher.get_public_key(self)
@@ -104,7 +105,7 @@ class ElGamal(Cipher):
 			c = (x*km) % p
 			return c
 
-	def decrypt(self,x):
+	def decrypt(self,x,lookuptable=None):
 		#
 		# Decrypts a single integer
 		#
@@ -125,7 +126,17 @@ class ElGamal(Cipher):
 
 		inv = self.__modinv(km,p)
 
-		return c*inv % p
+		m = c*inv % p
+
+		if self.exponential_mode:
+			assert lookuptable is not None
+			encoded_plaintext = lookuptable[m]
+		else:
+			encoded_plaintext = m
+
+		plaintext = self.__decode(encoded_plaintext)
+
+		return plaintext
 
 	def generate_lookup_table(self,a=0,b=10**3):
 		#
@@ -158,3 +169,32 @@ class ElGamal(Cipher):
 			return True
 		except:
 			return False
+
+	def __encode(self,plaintext):
+		# Receives a plaintext, string or not.
+		# Converts it to string (if it is not) and returns a single integer with the
+		# encoded 32-bit value integers
+
+		byte_array = bytearray(str(plaintext), 'utf-16')
+
+		encoded = 0
+		for index,byte in enumerate(byte_array):
+			encoded = (encoded << 8) + byte
+
+		return encoded
+
+	def __decode(self,encoded_plaintext):
+		# Receives a encoded plaintext, decodes and returns as string
+		#bytes array will hold the decoded original message bytes
+		bytes_array = []
+
+		assert type(encoded_plaintext) in (int,long)
+		last_8bits = lambda x: x & int("1"*8,2)
+
+		while encoded_plaintext != 0:
+			bytes_array.append(last_8bits(encoded_plaintext))
+			encoded_plaintext = encoded_plaintext >> 8
+		bytes_array.reverse()
+
+		m = bytearray(bytes_array).decode()
+		return m
