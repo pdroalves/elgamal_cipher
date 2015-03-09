@@ -72,9 +72,6 @@ class ElGamal(Cipher):
 		# Encrypts a single integer
 		#
 
-		m = self.__encode(plaintext)
-		assert self.__is_int(m)
-
 		pub = Cipher.get_public_key(self)
 
 		assert pub.has_key("p")
@@ -87,11 +84,18 @@ class ElGamal(Cipher):
 		km = pub["km"] if pub.has_key("km") else None
 
 		if self.exponential_mode:
+			# String encode not support for exponential mode
+			m = plaintext
+			assert type(m) == int
+
 			if m < 0:
 				x = self.__modinv(pow(alpha,-m,p),p)
 			else:
 				x = pow(alpha,m,p)
 		else:
+			m = self.__encode(plaintext)
+			assert self.__is_int(m)
+
 			x = m
 
 		if not km:
@@ -129,12 +133,12 @@ class ElGamal(Cipher):
 		m = c*inv % p
 
 		if self.exponential_mode:
-			assert lookuptable is not None
-			encoded_plaintext = lookuptable[m]
+			assert lookuptable is not None			
+			# String encode not support for exponential mode
+			plaintext = lookuptable[m]
 		else:
 			encoded_plaintext = m
-
-		plaintext = self.__decode(encoded_plaintext)
+			plaintext = self.__decode(encoded_plaintext)
 
 		return plaintext
 
