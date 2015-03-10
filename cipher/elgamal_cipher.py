@@ -133,7 +133,7 @@ class ElGamal(Cipher):
 		m = c*inv % p
 
 		if self.exponential_mode:
-			assert lookuptable is not None			
+			assert lookuptable is not None
 			# String encode not support for exponential mode
 			plaintext = lookuptable[m]
 		else:
@@ -191,7 +191,7 @@ class ElGamal(Cipher):
 		# Receives a encoded plaintext, decodes and returns as string
 		#bytes array will hold the decoded original message bytes
 		bytes_array = []
-
+		
 		assert type(encoded_plaintext) in (int,long)
 		last_8bits = lambda x: x & int("1"*8,2)
 
