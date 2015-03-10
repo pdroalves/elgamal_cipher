@@ -19,6 +19,7 @@ import random
 import unittest
 from cipher.elgamal_cipher import ElGamal
 import cipher.generate_prime as Prime
+import loremipsum
 
 class TestSequenceFunctions(unittest.TestCase):
     def test_miller_rabin(self):
@@ -149,6 +150,16 @@ class TestSequenceFunctions(unittest.TestCase):
 
         c = cipher.encrypt(m)
         self.assertEqual(c,cipher.encrypt(m))
+
+    def test_string_encrypting(self):
+        paragraphs = unicode("\n".join(loremipsum.get_paragraphs(10)))
+
+        cipher = ElGamal()
+        cipher.generate_keys(key_size=1024)
+
+        c = cipher.encrypt(paragraphs)
+        self.assertNotEqual(c[0],paragraphs)
+        self.assertEqual(cipher.decrypt(c),paragraphs)
 
 
 if __name__ == '__main__':
