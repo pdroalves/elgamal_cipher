@@ -67,12 +67,10 @@ class ElGamal(Cipher):
 		Cipher.add_to_public_key(self,"km",km)
 		return km
 
-	def encrypt(self,m):
+	def encrypt(self,plaintext):
 		#
 		# Encrypts a single integer
 		#
-
-		assert self.__is_int(m)
 
 		pub = Cipher.get_public_key(self)
 
@@ -86,11 +84,18 @@ class ElGamal(Cipher):
 		km = pub["km"] if pub.has_key("km") else None
 
 		if self.exponential_mode:
+			# String encode not support for exponential mode
+			m = plaintext
+			assert type(m) == int
+
 			if m < 0:
 				x = self.__modinv(pow(alpha,-m,p),p)
 			else:
 				x = pow(alpha,m,p)
 		else:
+			m = self.__encode(plaintext)
+			assert self.__is_int(m)
+
 			x = m
 
 		if not km:
@@ -104,7 +109,7 @@ class ElGamal(Cipher):
 			c = (x*km) % p
 			return c
 
-	def decrypt(self,x):
+	def decrypt(self,x,lookuptable=None):
 		#
 		# Decrypts a single integer
 		#
@@ -125,7 +130,17 @@ class ElGamal(Cipher):
 
 		inv = self.__modinv(km,p)
 
-		return c*inv % p
+		m = c*inv % p
+
+		if self.exponential_mode:
+			assert lookuptable is not None
+			# String encode not support for exponential mode
+			plaintext = lookuptable[m]
+		else:
+			encoded_plaintext = m
+			plaintext = self.__decode(encoded_plaintext)
+
+		return plaintext
 
 	def generate_lookup_table(self,a=0,b=10**3):
 		#
@@ -161,87 +176,29 @@ class ElGamal(Cipher):
 
 	def __encode(self,plaintext):
 		# Receives a plaintext, string or not.
-		# Converts it to string (if it is not) and returns a tuple of integers
+		# Converts it to string (if it is not) and returns a single integer with the
+		# encoded 32-bit value integers
 
 		byte_array = bytearray(str(plaintext), 'utf-16')
 
-		#encoded is the array of integers mod p
-		encoded = []
+		encoded = 0
+		for index,byte in enumerate(byte_array):
+			encoded = (encoded << 8) + byte
 
-		#each encoded integer will be a linear combination of k message bytes
-		#k must be the number of bits in the prime divided by 8 because each
-		#message byte is 8 bits long
-
-		iNumBits = int(math.ceil(math.log(self.keys["pub"]["p"])/math.log(2)))
-		k = iNumBits//8
-
-		#j marks the jth encoded integer
-		#j will start at 0 but make it -k because j will be incremented during first iteration
-		j = -1 * k
-		#num is the summation of the message bytes
-		num = 0
-		#i iterates through byte array
-		for i in range( len(byte_array) ):
-		        #if i is divisible by k, start a new encoded integer
-		        if i % k == 0:
-		                j += k
-		                num = 0
-		                encoded.append(0)
-		        #add the byte multiplied by 2 raised to a multiple of 8
-		        encoded[j//k] += byte_array[i]*(2**(8*(i%k)))
-
-		#example
-		        #if n = 24, k = n / 8 = 3
-		        #encoded[0] = (summation from i = 0 to i = k)m[i]*(2^(8*i))
-		        #where m[i] is the ith message byte
-
-		#return array of encoded integers
-		return tuple(encoded)
+		return encoded
 
 	def __decode(self,encoded_plaintext):
 		# Receives a encoded plaintext, decodes and returns as string
 		#bytes array will hold the decoded original message bytes
 		bytes_array = []
+		
+		assert type(encoded_plaintext) in (int,long)
+		last_8bits = lambda x: x & int("1"*8,2)
 
-		#same deal as in the encode function.
-		#each encoded integer is a linear combination of k message bytes
-		#k must be the number of bits in the prime divided by 8 because each
-		#message byte is 8 bits long
-		iNumBits = int(math.ceil(math.log(self.keys["pub"]["p"])/math.log(2)))
-		k = iNumBits//8
+		while encoded_plaintext != 0:
+			bytes_array.append(last_8bits(encoded_plaintext))
+			encoded_plaintext = encoded_plaintext >> 8
+		bytes_array.reverse()
 
-		#num is an integer in list encoded_plaintext
-		# for num in encoded_plaintext:
-		num = int(encoded_plaintext)
-		#get the k message bytes from the integer, i counts from 0 to k-1
-		for i in range(k):
-		        #temporary integer
-		        temp = num
-		        #j goes from i+1 to k-1
-		        for j in range(i+1, k):
-		                #get remainder from dividing integer by 2^(8*j)
-		                temp = temp % (2**(8*j))
-		        #message byte representing a letter is equal to temp divided by 2^(8*i)
-		        letter = temp // (2**(8*i))
-		        #add the message byte letter to the byte array
-		        bytes_array.append(letter)
-		        #subtract the letter multiplied by the power of two from num so
-		        #so the next message byte can be found
-		        num = num - (letter*(2**(8*i)))
-
-		#example
-		#if "You" were encoded.
-		#Letter        #ASCII
-		#Y              89
-		#o              111
-		#u              117
-		#if the encoded integer is 7696217 and k = 3
-		#m[0] = 7696217 % 256 % 65536 / (2^(8*0)) = 89 = 'Y'
-		#7696217 - (89 * (2^(8*0))) = 7696128
-		#m[1] = 7696128 % 65536 / (2^(8*1)) = 111 = 'o'
-		#7696128 - (111 * (2^(8*1))) = 7667712
-		#m[2] = 7667712 / (2^(8*2)) = 117 = 'u'
-
-		decodedText = bytearray(b for b in bytes_array).decode('utf-16')
-
-		return decodedText
+		m = bytearray(bytes_array).decode()
+		return m

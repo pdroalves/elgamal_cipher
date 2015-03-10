@@ -76,7 +76,8 @@ class TestSequenceFunctions(unittest.TestCase):
         cipher = ElGamal()
         cipher.generate_keys()
         value = random.randint(0,10000)
-        self.assertEqual(cipher.decrypt(cipher.encrypt(value)),value)
+        self.assertEqual(int(cipher.decrypt(cipher.encrypt(value))),value)
+
     def test_elgamal(self):
         #
         # Tests if this cipher can encrypt and decrypt all values up to 10**3
@@ -93,7 +94,7 @@ class TestSequenceFunctions(unittest.TestCase):
         for n in xrange(1,test_range):
             c,ke = cipher.encrypt(n)
             self.assertNotEqual(c,n)
-            self.assertEqual(cipher.decrypt([c,ke]),n)
+            self.assertEqual(int(cipher.decrypt([c,ke])),n)
 
     def test_elgamal_exponential(self):
         #
@@ -113,7 +114,7 @@ class TestSequenceFunctions(unittest.TestCase):
         for n in xrange(1,test_range):
             c,ke = cipher.encrypt(n)
             self.assertNotEqual(c,n)
-            self.assertEqual(lookup_table[cipher.decrypt([c,ke])],n)
+            self.assertEqual(int(cipher.decrypt([c,ke],lookup_table)),n)
 
     def test_deterministic_elgamal_A(self):
         #
