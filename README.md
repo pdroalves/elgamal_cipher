@@ -1,15 +1,15 @@
 ElGamal Cryptosystem
 ========================================
 
-#About
+# About
 
 This is a Python implementation of ElGamal cryptosystem. Our purpose is provide a correct, efficient and very easy to use; code.
 
-#Features
+# Features
 - Key generation process is completely encapsulated, including primes generation.
 - Support to deterministic and exponential mode.
 
-#Usage
+# Usage
 
 Now we will provide very simple and tiny examples of how to use this library. The correctness of the methods can be evaluated by test.py.
 
@@ -79,7 +79,7 @@ gm = elgamal.decrypt(x=[c,ke])
 m = lookup_table[gm]
 ```
 
-#License
+# License
 Copyright 2015 Pedro Alves
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,4 +97,4 @@ limitations under the License.
 --
 2015 - by Pedro Alves
 
-pdroalves (at) gmail.com
+pedro.alves (at) ic.unicamp.br
